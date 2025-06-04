@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/view_estimate.css') }}">
+{% endblock %}
+
+{% block content %}
+    <div class="project-header">
+        <h2>Project: {{ estimate.project_title }}</h2>
+        <h3>Manager: {{ estimate.project_manager }}</h3>
+        <h3>Location: {{ estimate.project_location }}</h3>
+    </div>
+    
+    <div class="estimate-details">
+        <h2>Estimate #{{ estimate.id }}</h2>
+        <h3>{{ estimate.client_name }}</h3>
+        <p>{{ estimate.project_address }}</p>
+    </div>
+
+    <h2>Materials List</h2>
+    <table>
+        <tr>
+            <th>#</th>
+            <th>Material</th>
+            <th>Color</th>
+            <th>Type</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Total</th>
+            <th>Action</th>
+        </tr>
+        {% for material in estimate.materials %}
+        <tr class="material-header">
+            <td rowspan="{{ material.types|length + 1 }}">{{ loop.index }}</td>
+            <td rowspan="{{ material.types|length + 1 }}">{{ material.name }}</td>
+            <td colspan="6"></td>
+        </tr>
+        {% for type in material.types %}
+        <tr class="material-type-row">
+            <td>{{ type.color }}</td>
+            <td>{{ type.type }}</td>
+            <td>{{ type.quantity }}</td>
+            <td>XAF {{ "{:,.0f}".format(type.unit_price)|replace(",", " ")|replace(".", ",") }}</td>
+            <td>XAF {{ "{:,.0f}".format(type.quantity * type.unit_price)|replace(",", " ")|replace(".", ",") }}</td>
+            <td><a href="{{ url_for('delete_material_type', type_id=type.id) }}">Delete</a></td>
+        </tr>
+        {% endfor %}
+        {% endfor %}
+        <tr class="subtotal-row">
+            <td colspan="6" style="text-align: right"><strong>Materials Total:</strong></td>
+            <td colspan="2">XAF {{ "{:,.0f}".format(materials_total)|replace(",", " ")|replace(".", ",") }}</td>
+        </tr>
+    </table>
+
+    <h2>Additional Costs</h2>
+    <table>
+        <tr>
+            <th>Description</th>
+            <th>Amount</th>
+        </tr>
+        {% for cost in estimate.additional_costs %}
+        <tr>
+            <td>{{ cost.description }}</td>
+            <td>XAF {{ "{:,.0f}".format(cost.amount)|replace(",", " ")|replace(".", ",") }}</td>
+        </tr>
+        {% endfor %}
+        <tr class="subtotal-row">
+            <td style="text-align: right"><strong>Additional Costs Total:</strong></td>
+            <td>XAF {{ "{:,.0f}".format(additional_costs_total)|replace(",", " ")|replace(".", ",") }}</td>
+        </tr>
+    </table>
+
+    <h2>Labor Cost: XAF {{ "{:,.0f}".format(estimate.labor_cost)|replace(",", " ")|replace(".", ",") }}</h2>
+    <h2>Grand Total: XAF {{ "{:,.0f}".format(materials_total + estimate.labor_cost + additional_costs_total)|replace(",", " ")|replace(".", ",") }}</h2>
+
+    <a href="{{ url_for('download_pdf', estimate_id=estimate.id) }}">
+        <button>Download PDF</button>
+    </a>
+
+    <div class="signature-section">
+        <h3>Client Signature</h3>
+        {% if estimate.signature %}
+            <img src="{{ estimate.signature }}" alt="Client Signature" class="signature-image">
+            <p>Signed on: {{ estimate.signature_date.strftime('%Y-%m-%d %H:%M') }}</p>
+        {% else %}
+            <canvas id="signatureCanvas" width="400" height="200"></canvas>
+            <div class="signature-controls">
+                <button type="button" onclick="clearSignature()">Clear</button>
+                <button type="button" onclick="saveSignature()">Sign & Save</button>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/signature.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            initSignature('signatureCanvas');
+        });
+
+        function saveSignature() {
+            const signatureData = getSignatureData();
+            fetch('/save_signature/{{ estimate.id }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ signature: signatureData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            });
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,14 @@
+.button-group {
+    margin: 20px 0;
+}
+
+.button-group button {
+    margin-right: 10px;
+    padding: 8px 15px;
+}
+
+td a {
+    color: #3498db;
+    text-decoration: none;
+    margin: 0 5px;
+}

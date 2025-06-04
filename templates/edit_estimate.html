@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/edit_estimate.css') }}">
+{% endblock %}
+
+{% block content %}
+    <h1>Edit Estimate #{{ estimate.id }}</h1>
+    <form method="POST">
+        <div class="form-group">
+            <label>Project Title:</label>
+            <input type="text" name="project_title" value="{{ estimate.project_title }}" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Project Manager:</label>
+            <input type="text" name="project_manager" value="{{ estimate.project_manager }}" required>
+        </div>
+
+        <div class="form-group">
+            <label>Project Location:</label>
+            <input type="text" name="project_location" value="{{ estimate.project_location }}" required>
+        </div>
+
+        <div class="form-group">
+            <label>Client Name:</label>
+            <input type="text" name="client_name" value="{{ estimate.client_name }}" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Project Address:</label>
+            <input type="text" name="project_address" value="{{ estimate.project_address }}" required>
+        </div>
+
+        <h3>Materials</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Material</th>
+                    <th>Color</th>
+                    <th>Type</th>
+                    <th>Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Total</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="materials">
+                {% for material in estimate.materials %}
+                {% for type in material.types %}
+                <tr class="material-row">
+                    <td>{{ loop.index }}</td>
+                    <td><input type="text" name="item[]" value="{{ material.name }}" required></td>
+                    <td>
+                        <select name="color[]" required class="color-select">
+                            <option value="">Select Color</option>
+                            {% for color in ['None', 'Black', 'Red', 'Blue', 'White', 'Green', 'Brown', 'Orange', 'Yellow', 'Purple', 'Gray'] %}
+                            <option value="{{ color }}" {% if type.color == color %}selected{% endif %}>
+                                {{ color[0:2]|upper }} - {{ color if color != 'None' else 'None' }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td><input type="text" name="type[]" value="{{ type.type }}" required></td>
+                    <td><input type="number" name="quantity[]" value="{{ type.quantity }}" oninput="updateRowTotal(event)" required></td>
+                    <td><input type="number" step="0.01" name="unit_price[]" value="{{ type.unit_price }}" oninput="updateRowTotal(event)" required></td>
+                    <td class="total">XAF {{ "{:,.0f}".format(type.quantity * type.unit_price)|replace(",", " ")|replace(".", ",") }}</td>
+                    <td><button type="button" onclick="removeMaterialRow(this)">Remove</button></td>
+                </tr>
+                {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="button" onclick="addMaterialRow()">Add Material</button>
+
+        <div class="form-group">
+            <label>Labor Cost:</label>
+            <input type="number" step="0.01" name="labor_cost" value="{{ estimate.labor_cost }}" oninput="updateGrandTotal()" required>
+        </div>
+
+        <h3>Additional Costs</h3>
+        <table id="additional-costs">
+            <tr>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Action</th>
+            </tr>
+            {% if estimate.additional_costs %}
+                {% for cost in estimate.additional_costs %}
+                <tr class="additional-cost-row">
+                    <td><input type="text" name="cost_description[]" value="{{ cost.description }}" required></td>
+                    <td><input type="number" step="0.01" name="cost_amount[]" value="{{ cost.amount }}" oninput="updateGrandTotal()" required></td>
+                    <td><button type="button" onclick="removeAdditionalCost(this)">Remove</button></td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr class="additional-cost-row">
+                    <td><input type="text" name="cost_description[]" required></td>
+                    <td><input type="number" step="0.01" name="cost_amount[]" oninput="updateGrandTotal()" required></td>
+                    <td><button type="button" onclick="removeAdditionalCost(this)">Remove</button></td>
+                </tr>
+            {% endif %}
+        </table>
+        <button type="button" onclick="addAdditionalCost()">Add Cost</button>
+
+        <h3>Grand Total: <span id="grandTotal">XAF {{ "{:,.0f}".format(materials_total + estimate.labor_cost)|replace(",", " ")|replace(".", ",") }}</span></h3>
+        <button type="submit">Update Estimate</button>
+    </form>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/edit_estimate.js') }}"></script>
+{% endblock %}

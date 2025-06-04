@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Estimate #{{ estimate.id }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #000; padding: 8px; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>Electrical Estimate #{{ estimate.id }}</h1>
+    <h2>{{ estimate.client_name }}</h2>
+    <h3>{{ estimate.project_address }}</h3>
+
+    <h4>Materials</h4>
+    <table>
+        <tr>
+            <th>#</th>
+            <th>Material</th>
+            <th>Color</th>
+            <th>Type</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+            <th>Total</th>
+        </tr>
+        {% for material in estimate.materials %}
+        <tr class="material-header">
+            <td rowspan="{{ material.types|length + 1 }}">{{ loop.index }}</td>
+            <td rowspan="{{ material.types|length + 1 }}">{{ material.name }}</td>
+            <td colspan="2"></td>
+        </tr>
+        {% for type in material.types %}
+        <tr class="material-type-row">
+            <td>{{ type.color }}</td>
+            <td>{{ type.type }}</td>
+            <td>{{ type.quantity }}</td>
+            <td>${{ "%.2f"|format(type.unit_price) }}</td>
+            <td>${{ "%.2f"|format(type.quantity * type.unit_price) }}</td>
+        </tr>
+        {% endfor %}
+        {% endfor %}
+        <tr class="subtotal-row">
+            <td colspan="6" style="text-align: right"><strong>Materials Total:</strong></td>
+            <td>${{ "%.2f"|format(materials_total) }}</td>
+        </tr>
+    </table>
+
+    <h4>Labor Cost: ${{ "%.2f"|format(estimate.labor_cost) }}</h4>
+    <h3>Grand Total: ${{ "%.2f"|format(materials_total + estimate.labor_cost) }}</h3>
+</body>
+</html>

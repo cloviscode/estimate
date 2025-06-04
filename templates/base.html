@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#062ffc">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>{% block title %}Clochanix Electric - Estimator{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v6.0.0-beta3/css/all.css">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <nav>
+        <div class="nav-content">
+            <div class="brand">
+                <div class="nav-links main-links">
+                    <a href="{{ url_for('index') }}" class="nav-link"><i class="fas fa-home"></i> Home</a>
+                    <a href="{{ url_for('index') }}" class="nav-link"><i class="fas fa-calculator"></i> Estimates</a>
+                    <a href="{{ url_for('create_estimate') }}" class="button"><i class="fas fa-plus"></i> New Estimate</a>
+                </div>
+            </div>
+            <div class="company-info">
+                <img src="{{ url_for('static', filename='images/logos.png') }}" alt="Clochanix Electric Logo" class="logo-small">
+                <div class="company-text">
+                    <div class="company-name">CLOCHANIX ELECTRIC SERVICES</div>
+                    <div class="company-slogan">WE ARE HAPPY TO LIGHT YOUR HOME</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="social-links">
+                <a href="https://www.facebook.com/clochanix" target="_blank"><i class="fab fa-facebook"></i></a>
+                <a href="https://twitter.com/clochanix" target="_blank"><i class="fab fa-twitter"></i></a>
+                <a href="https://www.linkedin.com/company/clochanix" target="_blank"><i class="fab fa-linkedin"></i></a>
+                <a href="https://api.whatsapp.com/+237680547526" target="_blank"><i class="fab fa-whatsapp"></i></a>
+            </div>
+            <p>&copy; <span id="currentYear"></span> Clochanix Electric Services. All rights reserved.</p>
+        </div>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+    <script>
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>

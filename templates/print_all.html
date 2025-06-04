@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>All Estimates</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #000; padding: 8px; }
+        th { background-color: #f2f2f2; }
+        .estimate { page-break-after: always; }
+        .estimate:last-child { page-break-after: auto; }
+    </style>
+</head>
+<body>
+    {% for estimate in estimates %}
+    <div class="estimate">
+        <div class="project-details">
+            <h1>Project Details</h1>
+            <table class="details-table">
+                <tr>
+                    <th>Project Title:</th>
+                    <td>{{ estimate.project_title }}</td>
+                </tr>
+                <tr>
+                    <th>Project Manager:</th>
+                    <td>{{ estimate.project_manager }}</td>
+                </tr>
+                <tr>
+                    <th>Project Location:</th>
+                    <td>{{ estimate.project_location }}</td>
+                </tr>
+                <tr>
+                    <th>Client Name:</th>
+                    <td>{{ estimate.client_name }}</td>
+                </tr>
+                <tr>
+                    <th>Project Address:</th>
+                    <td>{{ estimate.project_address }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <h2>Electrical Estimate #{{ estimate.id }}</h2>
+        <h2>{{ estimate.client_name }}</h2>
+        <h3>{{ estimate.project_address }}</h3>
+
+        <table>
+            <tr>
+                <th>#</th>
+                <th>Material</th>
+                <th>Color</th>
+                <th>Type</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Total</th>
+            </tr>
+            {% for material in estimate.materials %}
+            <tr class="material-header">
+                <td rowspan="{{ material.types|length + 1 }}">{{ loop.index }}</td>
+                <td rowspan="{{ material.types|length + 1 }}">{{ material.name }}</td>
+                <td colspan="5"></td>
+            </tr>
+            {% for type in material.types %}
+            <tr>
+                <td>{{ type.color }}</td>
+                <td>{{ type.type }}</td>
+                <td>{{ type.quantity }}</td>
+                <td>XAF {{ "{:,.0f}".format(type.unit_price)|replace(",", " ")|replace(".", ",") }}</td>
+                <td>XAF {{ "{:,.0f}".format(type.quantity * type.unit_price)|replace(",", " ")|replace(".", ",") }}</td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
+        </table>
+
+        <h4>Additional Costs</h4>
+        <table>
+            <tr>
+                <th>Description</th>
+                <th>Amount</th>
+            </tr>
+            {% for cost in estimate.additional_costs %}
+            <tr>
+                <td>{{ cost.description }}</td>
+                <td>XAF {{ "{:,.0f}".format(cost.amount)|replace(",", " ")|replace(".", ",") }}</td>
+            </tr>
+            {% endfor %}
+            <tr class="subtotal-row">
+                <td style="text-align: right"><strong>Additional Costs Total:</strong></td>
+                <td>XAF {{ "{:,.0f}".format(estimate_totals[estimate.id]['additional_costs'])|replace(",", " ")|replace(".", ",") }}</td>
+            </tr>
+        </table>
+
+        <h3>Labor Cost: XAF {{ "{:,.0f}".format(estimate.labor_cost)|replace(",", " ")|replace(".", ",") }}</h3>
+        <h2>Grand Total: XAF {{ "{:,.0f}".format(estimate_totals[estimate.id]['total'])|replace(",", " ")|replace(".", ",") }}</h2>
+    </div>
+    {% endfor %}
+</body>
+</html>
